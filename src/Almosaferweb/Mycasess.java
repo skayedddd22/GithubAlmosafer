@@ -16,49 +16,33 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
-public class Mycasess {
-	String TheWebsite = "https://www.almosafer.com/en";
-	WebDriver driver = new ChromeDriver();
-	SoftAssert softassert = new SoftAssert();
-	Random rand = new Random();
-	String [] arabicCitiesName = {"دبي","جده"};
-	String [] englishCitiesName = {"dubai","jeddah","riyadh"};
-	 int randomArabic = rand.nextInt(arabicCitiesName.length);
-	int randomEnglish = rand.nextInt(englishCitiesName.length);
+public class Mycasess extends pramametersClass {
+	
 	
 	@BeforeTest
 	public void SetUp() {
-		driver.manage().window().maximize();
-		driver.get(TheWebsite);
-		WebElement WelcomeScreen = driver.findElement(By.xpath("//button[normalize-space()='Kingdom of Saudi Arabia, SAR']"));
-		WelcomeScreen.click();
+		thebeginigofWebsite();
 	}
-	@Test(enabled = false)
-	public void CheckTheLanguage() {
-		String ActualLang = driver.findElement(By.tagName("html")).getAttribute("lang");
-		String ExpectedLang = "en";
-		softassert.assertEquals(ActualLang,ExpectedLang,"this is to chek language" );
+	@Test(description = "this is a happy scenrio",priority =1)
+	public void CheckTheDefultLanguageEn() {
+		checkthelanguageFunction("en");
 	}
-	@Test(enabled = false)
+	@Test(description = "this is a sad scenrio",priority =2)
+	public void CheckTheDefultLanguageAr() {
+		checkthelanguageFunction("ar");
+	}
+	@Test(description = "this is to check that currency is SAR",priority=3)
 	public void checkTheCurrency() {
-		String ExpectedCurrency = "SAR";
-		WebElement CurrencyElement = driver.findElement(By.cssSelector(".sc-dRFtgE.fPnvOO"));
-		String ActualCurrency =  CurrencyElement.getText();
-		softassert.assertEquals(ActualCurrency, ExpectedCurrency);
+		checkthecurrencyFunction("SAR");
 	}
-	@Test(enabled = false)
+	@Test(enabled = true)
 	public void checkContactNumber() {
-		String ExpectedContactNumber = "+966554400000";
-		WebElement ContactNumberelement=driver.findElement(By.cssSelector("a[class='sc-hUfwpO bWcsTG'] strong"));
-		String ActualContactNumber = ContactNumberelement.getText();
-		softassert.assertEquals(ActualContactNumber, ExpectedContactNumber);
+		checkthenumberFunction("+966554400000");
 		
 	}
-	@Test(enabled = false)
-	public void checkQitafflogo() {
-	WebElement checkqittlogo= driver.findElement(By.xpath("//div[@class='sc-dhVevo fMVfql']"));
-	boolean isQitafflogoDisplayed = checkqittlogo.isDisplayed();
-	System.out.println(isQitafflogoDisplayed );
+	@Test()
+	public void checklogoapple() {
+		checkthelogoFunction(driver.findElement(By.xpath("//img[@alt='apple-pay']")));
 	
 	}
 	@Test(enabled = false)
@@ -82,7 +66,7 @@ public class Mycasess {
 		String dayElementOnTheWebsite = driver.findElement(By.cssSelector("div[class='sc-OxbzP sc-lnrBVv gKbptE'] span[class='sc-eSePXt ljMnJa']")).getText().toUpperCase();
 	    Assert.assertEquals(dayElementOnTheWebsite, today.plusDays(1).getDayOfWeek().toString());
 	}
-	@Test(invocationCount = 1)
+	@Test(enabled=false)
 	public void changeTheLanguageOfTheWebsiteRandomly() throws InterruptedException {
 		String []myUrls = {"https://www.almosafer.com/ar?ncr=1"," https://www.almosafer.com/en"};
 		int randomIndex = rand.nextInt(myUrls.length);
@@ -101,10 +85,10 @@ public class Mycasess {
 			WebElement cityList = driver.findElement(By.className("phbroq-4"));
 			List<WebElement> myItems = cityList.findElements(By.tagName("li"));
 			myItems.get(1).click();
-			WebElement vistorInput = driver.findElement(By.className("tln3e3-1"));
-			Select myselector = new Select(vistorInput);
-			myselector.selectByVisibleText("1 غرفة، 1 بالغ، 0 أطفال");
-		}else {
+			
+		}
+		
+		else {
 			
 			Assert.assertEquals(ActualLanguage, "en");
 			SearchHotelInout.sendKeys(englishCitiesName[randomEnglish]);
@@ -112,10 +96,40 @@ public class Mycasess {
 			WebElement cityList = driver.findElement(By.className("phbroq-4"));
 			List<WebElement> myItems = cityList.findElements(By.tagName("li"));
 			myItems.get(1).click();
-			WebElement vistorInput = driver.findElement(By.className("tln3e3-1"));
-			Select myselector = new Select(vistorInput);
-			myselector.selectByVisibleText("1 Room, 1 Adult, 0 Children");
 		}
+		WebElement vistorInput = driver.findElement(By.className("tln3e3-1"));
+		Select myselector = new Select(vistorInput);
+	    int randomIndexForVistor =rand.nextInt(2);
+	    myselector.selectByIndex(randomIndexForVistor);
+	    WebElement Searchbutton = driver.findElement(By.className("sc-1vkdpp9-6"));
+	    Searchbutton.click();
+	    
+	    Thread.sleep(35000);
+	    String Hotelsearchresult = driver.findElement(By.className("sc-cClmTo")).getText();
+	    if(driver.getCurrentUrl().contains("ar")) {
+	    
+	   boolean ActualResult= Hotelsearchresult.contains("وجدنا");
+	   boolean ExpectedResult =true;
+	   Assert.assertEquals(ActualResult, ExpectedResult);
+	   WebElement lowerprice =driver.findElement(By.className(" bkDVyx"));
+	   lowerprice.click();
+	    }else {
+	    boolean ActualResult=Hotelsearchresult.contains("found");
+	    boolean ExpectedResult =true;
+		   Assert.assertEquals(ActualResult, ExpectedResult);
+		   WebElement lowerprice =driver.findElement(By.className("jurIdk"));
+		   lowerprice.click();
+		   Thread.sleep(3000);
+	    }
+	    WebElement pricesection =driver.findElement(By.cssSelector(".sc-htpNat.KtFsv.col"));
+	    List<WebElement>myprices =pricesection.findElements(By.className("Price_Value"));
+	  
+	    	int lowprice = Integer.parseInt(myprices.get(0).getText());
+	    	int highprice = Integer.parseInt(myprices.get(myprices.size()-1).getText());
+	    	System.out.println(lowprice +"this is the lowest price");
+	    	System.out.println(highprice+"this is the highest price");
+	    	Assert.assertEquals(highprice>lowprice, true);
+	    
 		}
 	
 	
